@@ -1,0 +1,10 @@
+option java_package = "cn.gyyx.core.net.protocol";
+option java_outer_classname = "p_module_common";
+
+message p_module_common_ping {
+
+}
+
+message p_module_common_ack {
+
+}

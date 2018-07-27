@@ -1,0 +1,4 @@
+syntax = "proto3";
+message UserLotteryCount{
+    int32 lotteryCount = 1;
+}

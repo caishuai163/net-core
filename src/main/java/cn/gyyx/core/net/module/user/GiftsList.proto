@@ -1,0 +1,12 @@
+syntax = "proto3";
+message GiftsList {
+    map<string, Gift> giftMap = 1;
+}
+
+message Gift {
+    string name = 1;
+    int32 chance = 2;
+    int32 num = 3;
+    string english = 4;
+    string prizecode = 5;
+}

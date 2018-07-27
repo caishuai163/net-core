@@ -1,0 +1,6 @@
+namespace java cn.gyyx.core.net.rpc
+
+service UserService {
+
+	string getUser(1:string name);
+}

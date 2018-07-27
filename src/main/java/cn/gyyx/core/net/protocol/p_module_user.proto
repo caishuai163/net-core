@@ -1,0 +1,12 @@
+option java_package = "cn.gyyx.core.net.protocol";
+option java_outer_classname = "p_module_user";
+
+message p_module_user_login_request {
+	optional string account = 1;
+	optional string password = 2;
+}
+
+message p_module_user_login_result {
+	optional bool isSuccess = 1;
+	optional string message = 2;
+}
