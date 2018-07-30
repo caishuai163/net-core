@@ -28,16 +28,21 @@ public class ClientTest {
         if (!isStart) {
             synchronized (lockObj) {
                 if (!isStart) {
+                    /** ProtoBuf处理管理类 */
                     ProtoHandlerMgr protoHandlerMgr = new ProtoHandlerMgr();
-
+                    /** netty reactor 事件组管理类 */
                     EventGroupMgr eventGroupMgr = new EventGroupMgr();
+                    /** netty cannel 数据写入操作类 */
                     ChannelWriteMgr channelWriteMgr = new ChannelWriteMgr();
-
+                    /** 定时器管理 */
                     TimerMgr timerMgr = new TimerMgr();
+                    /** Zookeeper 管理类 */
                     CuratorMgr curatorMgr = new CuratorMgr();
+                    /** 初始化服务注册&发现 */
                     ServiceDiscoverMgr discoverMgr = new ServiceDiscoverMgr(
                             curatorMgr);
-
+                    
+                    /** 路由服务 */
                     ServiceRoute serviceRote = new ServiceRoute();
                     ServiceDiscover discover = new ServiceDiscover(curatorMgr,
                             discoverMgr, serviceRote);

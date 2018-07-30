@@ -4,47 +4,49 @@ import com.google.protobuf.GeneratedMessage;
 
 import cn.gyyx.core.net.service.ProviderStrategryType;
 
+/**
+ * 定义客户端disrupter事件
+ */
 public class ClientEventInfo {
 
-	private long id;
-	
-	private GeneratedMessage body;
-	
-	private String serviceName;
-	
-	private ProviderStrategryType strategryType;
+    private long id;
 
+    private GeneratedMessage body;
 
-	public long getId() {
-		return id;
-	}
+    private String serviceName;
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    private ProviderStrategryType strategryType;
 
-	public String getServiceName() {
-		return serviceName;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public void setServiceName(String serviceName) {
-		this.serviceName = serviceName;
-	}
+    public void setId(long id) {
+        this.id = id;
+    }
 
-	public ProviderStrategryType getStrategryType() {
-		return strategryType;
-	}
+    public String getServiceName() {
+        return serviceName;
+    }
 
-	public void setStrategryType(ProviderStrategryType strategryType) {
-		this.strategryType = strategryType;
-	}
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
 
-	public GeneratedMessage getBody() {
-		return body;
-	}
+    public ProviderStrategryType getStrategryType() {
+        return strategryType;
+    }
 
-	public void setBody(GeneratedMessage body) {
-		this.body = body;
-	}
+    public void setStrategryType(ProviderStrategryType strategryType) {
+        this.strategryType = strategryType;
+    }
+
+    public GeneratedMessage getBody() {
+        return body;
+    }
+
+    public void setBody(GeneratedMessage body) {
+        this.body = body;
+    }
 
 }

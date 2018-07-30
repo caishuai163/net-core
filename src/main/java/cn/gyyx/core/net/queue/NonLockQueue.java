@@ -49,6 +49,15 @@ public class NonLockQueue {
      */
     private static final WaitStrategy YIELDING_WAIT = new YieldingWaitStrategy();
 
+    /**
+     * 无锁队列启动
+     *
+     * @param eventhandler
+     * @param ip
+     * @param port
+     * @throws Exception
+     *             void
+     */
     public static void start(QueueServerConsumer eventhandler, String ip,
             int port) throws Exception {
         /** 创建一个单线程化的线程池，它只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序(FIFO, LIFO, 优先级)执行。 */
