@@ -107,13 +107,13 @@ public class ConnectMgr {
         try {
             String address = ip + ":" + port;
             Channel channel = clientSessionMgr.getChannel(serviceName, address);
-
             if (channel != null) {
                 return channel;
             }
 
+            /** 如果缓存中不存在 直接创建连接netty Channel */
             channel = doConnect(ip, port);
-
+            /** 缓存channel */
             if (channel != null) {
                 ClientSessionInfo session = new ClientSessionInfo();
                 session.setServiceName(serviceName);
@@ -186,8 +186,8 @@ public class ConnectMgr {
     }
 
     /**
-     * <h3>建立一个netty通道</h3>
-     * 
+     * <h3>建立一个netty通道</h3> </br>
+     * <h5>关于netty channel</h5>
      * <ul>
      * <li>1）通道状态主要包括：打开、关闭、连接</li>
      * <li>2）通道主要的IO操作，读(read)、写(write)、连接(connect)、绑定(bind)。</li>
@@ -203,12 +203,14 @@ public class ConnectMgr {
      * @return {@link Channel}
      */
     private Channel doConnect(String ip, int port) {
-
+        /** netty channel 启动器 */
         Bootstrap bootstrap = new Bootstrap();
-
+        /** 设置模式为nio */
         bootstrap.channel(NioSocketChannel.class);
+        /** 设置处理事件的事件组 */
         bootstrap.group(eventGroupMgr.getWorkGroup());
 
+        /** 初始化handler事件 */
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
@@ -216,13 +218,13 @@ public class ConnectMgr {
                 ch.pipeline().addLast(new ClientEncoder(ConnectMgr.this));
             }
         });
-
+        /** 启动配置 TODO */
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_RCVBUF, 64 * 1024)
                 .option(ChannelOption.SO_SNDBUF, 64 * 1024)
                 .option(ChannelOption.SO_LINGER, 0);
-
+        /** 建立连接平返回channel */
         try {
             return bootstrap.connect(ip, port).sync().channel();
         } catch (InterruptedException e) {

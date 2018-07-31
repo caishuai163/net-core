@@ -205,7 +205,7 @@ public abstract class ModuleClientService {
     }
 
     /**
-     * 获取业务所对应的详细信息
+     * 获取业务操作所对应的服务详细信息
      * 
      * @param serviceName
      *            业务名称
@@ -216,7 +216,7 @@ public abstract class ModuleClientService {
     public ServiceEntry getServiceAddress(String serviceName,
             ProviderStrategryType strategryType) {
         try {
-            /** 获取业务实例 */
+            /** 获取服务实例 */
             ServiceInstance<ServiceEntry> instance = discover
                     .getService(serviceName, strategryType);
 
@@ -224,7 +224,7 @@ public abstract class ModuleClientService {
                 return null;
             }
 
-            /** 返回业务实例详情 */
+            /** 返回服务实例详情 */
             return instance.getPayload();
 
         } catch (Throwable ex) {

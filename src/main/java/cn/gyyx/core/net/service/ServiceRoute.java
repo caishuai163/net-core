@@ -10,7 +10,7 @@ import org.apache.curator.x.discovery.strategies.RandomStrategy;
 import org.apache.curator.x.discovery.strategies.RoundRobinStrategy;
 
 /**
- * 路由服务
+ * 路由服务，管理zookeeper服务的路由策略类型
  */
 public class ServiceRoute implements ProviderStrategy<ServiceEntry> {
 
@@ -50,6 +50,7 @@ public class ServiceRoute implements ProviderStrategy<ServiceEntry> {
      * @param stategry
      *            {@link ProviderStrategryType}
      * @param id
+     *            固定路由模式下指定的路由id
      */
     public void setProviderStrategryType(ProviderStrategryType stategry,
             int id) {

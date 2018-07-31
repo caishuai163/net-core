@@ -18,87 +18,91 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 public abstract class DecoderBase extends LengthFieldBasedFrameDecoder {
 
-	protected final ThreadLocal<ProtoParser> THREAD_LOCAL_PARSER = new ThreadLocal<ProtoParser>() {
+    protected final ThreadLocal<ProtoParser> THREAD_LOCAL_PARSER = new ThreadLocal<ProtoParser>() {
 
-		@Override
-		protected ProtoParser initialValue() {
-			return new ProtoParser();
-		}
+        @Override
+        protected ProtoParser initialValue() {
+            return new ProtoParser();
+        }
 
-	};
-	
-	protected ProtoHandlerMgr protoHandlerMgr;
-	
-	public DecoderBase(int maxFrameLength, ProtoHandlerMgr protoHandlerMgr) {
-		super(maxFrameLength,0,4,0,4);
-		this.protoHandlerMgr = protoHandlerMgr;
-	}
-	
-	@Override
-	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		super.channelInactive(ctx);
-	}
-	
-	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		super.channelActive(ctx);
-	}
-	
-	@Override
-	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-		super.channelUnregistered(ctx);
-	}
-	
-	@Override
-	public void channelRegistered(ChannelHandlerContext ctx) {
-		ChannelConfig config = ctx.channel().config();
+    };
 
-		DefaultSocketChannelConfig socketConfig = (DefaultSocketChannelConfig)config;
+    protected ProtoHandlerMgr protoHandlerMgr;
 
-		socketConfig.setPerformancePreferences(0,1,2);
+    public DecoderBase(int maxFrameLength, ProtoHandlerMgr protoHandlerMgr) {
+        super(maxFrameLength, 0, 4, 0, 4);
+        this.protoHandlerMgr = protoHandlerMgr;
+    }
 
-		socketConfig.setAllocator(PooledByteBufAllocator.DEFAULT);
+    /** 以下几个方法，我认为可以删掉了，实现父类的方法却又调用父类的实现 */
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+    }
 
-		ctx.fireChannelRegistered();
-	}
-	
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx,Throwable cause) throws Exception {
-		cause.printStackTrace();
-	}
-	
-	protected GeneratedMessage readFrame(ByteBuf buffer, int protoEnumInt) throws Exception {
-		
-		ByteBufInputStream is = new ByteBufInputStream(buffer);
-		
-		ProtoParser parserCache = THREAD_LOCAL_PARSER.get();
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+    }
 
-		Parser<?> parser = parserCache.getParser(protoEnumInt);
-		
-		return (GeneratedMessage)parser.parseFrom(is);
-	}
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx)
+            throws Exception {
+        super.channelUnregistered(ctx);
+    }
 
-	protected final class ProtoParser {
+    @Override
+    public void channelRegistered(ChannelHandlerContext ctx) {
+        ChannelConfig config = ctx.channel().config();
 
-		private final Map<Integer, Parser<?>> parserMap = new HashMap<>();
+        DefaultSocketChannelConfig socketConfig = (DefaultSocketChannelConfig) config;
 
-		public Parser<?> getParser(int protoEnumInt) throws Exception {
+        socketConfig.setPerformancePreferences(0, 1, 2);
 
-			Parser<?> parser = parserMap.get(protoEnumInt);
+        socketConfig.setAllocator(PooledByteBufAllocator.DEFAULT);
 
-			if(null != parser) {
-				return parser;
-			}
+        ctx.fireChannelRegistered();
+    }
 
-			Class<?> clazz = protoHandlerMgr.getProtoClass(protoEnumInt);
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+            throws Exception {
+        cause.printStackTrace();
+    }
 
-			Field field = clazz.getField("PARSER");
+    protected GeneratedMessage readFrame(ByteBuf buffer, int protoEnumInt)
+            throws Exception {
 
-			Parser<?> reflectParser = (Parser<?>)field.get(clazz);
+        ByteBufInputStream is = new ByteBufInputStream(buffer);
 
-			parserMap.put(protoEnumInt, reflectParser);
+        ProtoParser parserCache = THREAD_LOCAL_PARSER.get();
 
-			return reflectParser;
-		}
-	}
+        Parser<?> parser = parserCache.getParser(protoEnumInt);
+
+        return (GeneratedMessage) parser.parseFrom(is);
+    }
+
+    protected final class ProtoParser {
+
+        private final Map<Integer, Parser<?>> parserMap = new HashMap<>();
+
+        public Parser<?> getParser(int protoEnumInt) throws Exception {
+
+            Parser<?> parser = parserMap.get(protoEnumInt);
+
+            if (null != parser) {
+                return parser;
+            }
+
+            Class<?> clazz = protoHandlerMgr.getProtoClass(protoEnumInt);
+
+            Field field = clazz.getField("PARSER");
+
+            Parser<?> reflectParser = (Parser<?>) field.get(clazz);
+
+            parserMap.put(protoEnumInt, reflectParser);
+
+            return reflectParser;
+        }
+    }
 }

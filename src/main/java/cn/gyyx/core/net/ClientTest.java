@@ -41,23 +41,29 @@ public class ClientTest {
                     /** 初始化服务注册&发现 */
                     ServiceDiscoverMgr discoverMgr = new ServiceDiscoverMgr(
                             curatorMgr);
-                    
+
                     /** 路由服务 */
                     ServiceRoute serviceRote = new ServiceRoute();
+                    /** 服务发现 */
                     ServiceDiscover discover = new ServiceDiscover(curatorMgr,
                             discoverMgr, serviceRote);
+                    /** 服务注册 */
                     ServiceRegister serviceRegister = new ServiceRegister(
                             discoverMgr);
+                    /** 初始化客户端session管理器 */
                     ClientSessionMgr clientSessionMgr = new ClientSessionMgr(
                             channelWriteMgr, serviceRegister);
+                    /** 初始化连接管理器 */
                     ConnectMgr connectmgr = new ConnectMgr(eventGroupMgr,
                             clientSessionMgr, timerMgr, protoHandlerMgr);
 
+                    /** 初始化一个客户生产者 */
                     clientService = new UserClientService(protoHandlerMgr,
                             connectmgr, discover);
-
+                    /** 初始化客户端消费者 */
                     UserClientConsumer consumer = new UserClientConsumer(
                             clientService);
+                    /** 启动生产者消费者无锁队列 */
                     ClientNonLockQueue.start(consumer);
                     isStart = true;
                 }
@@ -68,6 +74,7 @@ public class ClientTest {
     public static p_module_user_login_result send() throws Exception {
 
         init();
+        /** 客户端发送数据 */
         return clientService.accountLogin("pipeline", "1236978");
     }
 }

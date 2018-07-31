@@ -8,7 +8,7 @@ import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 import cn.gyyx.core.net.service.ServiceEntry;
 
 /**
- * zookeeper服务注册与发现管理类
+ * zookeeper服务发现管理类
  */
 public class ServiceDiscoverMgr {
 
