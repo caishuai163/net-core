@@ -27,10 +27,7 @@ import cn.gyyx.core.net.service.ServiceEntry;
 import io.netty.channel.Channel;
 
 /**
- * <p>
  * 客户端业务处理service抽象类
- * </p>
- * 
  */
 public abstract class ModuleClientService {
 
@@ -78,11 +75,11 @@ public abstract class ModuleClientService {
     }
 
     /**
-     * 获取同步的内容
+     * 获取同步的内容,目的是在消费者执行完网络请求后，可以获取到对应调用生产者的方法{@link #sendSyncMsg(String, GeneratedMessage, ProviderStrategryType)}的上下文信息
      *
      * @param syncId
      *            同步的id
-     * @return SyncContext
+     * @return SyncContext 同步上下文信息
      */
     public SyncContext getSyncContext(long syncId) {
         return this.syncContexts.get(syncId);
@@ -90,16 +87,15 @@ public abstract class ModuleClientService {
 
     /**
      * 
-     * <p>
-     * 同步发送消息（有？？？？？？？？？？？） TODO
-     * </p>
-     *
+     * <h3>同步发送消息</h3></br>
+     * 当执行到将生产者放入队列后,会等待消费者执行网络请求。消费者拿到网络请求结果后，将结果异步通知到方法内，该方法结束等待，继续执行返回结果
      *
      * @param serviceName
      *            业务名称
      * @param proto
      *            protoBuf数据
      * @param strategryType
+     *            路由策略模式
      * @return ResultInfo
      * @throws InterruptedException
      * 
@@ -146,7 +142,7 @@ public abstract class ModuleClientService {
             return context.getResult();
         } finally {
             /**
-             * 移除缓存context数据
+             * 移除缓存context数据 ，证明本次请求结束
              */
             syncContexts.remove(id);
         }
@@ -193,7 +189,11 @@ public abstract class ModuleClientService {
         clientSessionMgr.updateSyncContext(context, channel);
         clientSessionMgr.sendMsg(channel, data.getBody());
 
-        /** 如果整个流程30秒内仍没有被释放掉，返回timeOut */
+        /**
+         * 如果整个流程30秒内仍没有被释放掉，返回timeOut</br>
+         * 这里实际上是在等待channel发送请求和接收返回信息。</br>
+         * 当接收到返回信息时，latch会被释放掉
+         */
         if (!latch.await(DEFALT_TIMEOUT, TimeUnit.SECONDS)) {
             ResultInfo result = new ResultInfo();
             result.setErrorCode(StatusCode.TIMEOUT);
@@ -253,7 +253,8 @@ public abstract class ModuleClientService {
      * </p>
      * protoBuff处理业务步骤
      * <ul>
-     * <li>注册ping 注册ack (心跳包) {@link ProtoHandlerMgr#registerProto(int, Class)}</li>
+     * <li>注册ping 注册ack (心跳包)
+     * {@link ProtoHandlerMgr#registerProto(int, Class)}</li>
      * <li>自身其他业务注册实现{@link #registerProtoImpl()}</li>
      * </ul>
      */

@@ -17,6 +17,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
+/**
+ * 创建tcp的绑定后，当客户端有请求发过来的时候，会先走客户端数据解码操作
+ */
 public class ClientDecoder extends DecoderBase {
 
     private static final int MAX_SERVER_PACKAGE_LENGTH = 1024 * 128;
@@ -42,15 +45,17 @@ public class ClientDecoder extends DecoderBase {
         long requestId = byteBuf.readLong();
         int protoEnumInt = byteBuf.readInt();
         long sign = byteBuf.readLong();
-
+        /** 这里处理的是心跳包 */
         if (protoEnumInt == ProtoType.P_MODULE_COMMON_PING) {
             sessionMgr.pingHandler(ctx.channel(), requestId);
             return Unpooled.EMPTY_BUFFER;
         }
 
         try {
+            /** 调用baseDecode中的方法，将数据转换(protobuf) */
             GeneratedMessage protoObj = this.readFrame(byteBuf, protoEnumInt);
 
+            /** 对数据做一次crc检验 */
             ByteBuffer byteBuffer = ByteBuffer.allocate(length - 8);
             byteBuffer.putLong(requestId);
             byteBuffer.putInt(protoEnumInt);
@@ -58,11 +63,12 @@ public class ClientDecoder extends DecoderBase {
             long tmpSign = CRCUtil.Generic(byteBuffer.array());
 
             if (sign != tmpSign) {
+                /** 校验不通过，则发送数据签名错误返回 */
                 sessionMgr.sendMsg(requestId, StatusCode.SIGNERROR,
                     ctx.channel(), null);
                 return Unpooled.EMPTY_BUFFER;
             }
-
+            /** 返回服务器端回传的事件并塞入队列 */
             EventInfo eventInfo = new EventInfo();
             eventInfo.setEventType(EventType.CLIENT_PROTO_COMMING);
             eventInfo.setBody(protoObj);

@@ -16,6 +16,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DefaultSocketChannelConfig;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
+/**
+ * 解码Base
+ */
 public abstract class DecoderBase extends LengthFieldBasedFrameDecoder {
 
     protected final ThreadLocal<ProtoParser> THREAD_LOCAL_PARSER = new ThreadLocal<ProtoParser>() {
@@ -51,6 +54,9 @@ public abstract class DecoderBase extends LengthFieldBasedFrameDecoder {
         super.channelUnregistered(ctx);
     }
 
+    /**
+     * 重载channel的注册方法，修改channel的config配置
+     */
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) {
         ChannelConfig config = ctx.channel().config();
@@ -64,42 +70,59 @@ public abstract class DecoderBase extends LengthFieldBasedFrameDecoder {
         ctx.fireChannelRegistered();
     }
 
+    /**
+     * 重载异常捕捉，处理为打印异常
+     */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {
         cause.printStackTrace();
     }
 
+    /**
+     * 将数据转换
+     *
+     * @param buffer
+     * @param protoEnumInt
+     * @return {@link GeneratedMessage}
+     * @throws Exception
+     */
     protected GeneratedMessage readFrame(ByteBuf buffer, int protoEnumInt)
             throws Exception {
 
         ByteBufInputStream is = new ByteBufInputStream(buffer);
-
+        /** 从线程组中拿出一个protoBUf解析器 */
         ProtoParser parserCache = THREAD_LOCAL_PARSER.get();
-
+        /** 找到对应数据类型的解析器 */
         Parser<?> parser = parserCache.getParser(protoEnumInt);
-
+        /** 解析数据 */
         return (GeneratedMessage) parser.parseFrom(is);
     }
 
     protected final class ProtoParser {
-
+        /** 用作缓存解析器的map */
         private final Map<Integer, Parser<?>> parserMap = new HashMap<>();
 
+        /**
+         * 获取解析器
+         * 
+         * @param protoEnumInt
+         * @return {@link Parser}
+         * @throws Exception
+         */
         public Parser<?> getParser(int protoEnumInt) throws Exception {
-
+            /** 缓存中获取解析器 */
             Parser<?> parser = parserMap.get(protoEnumInt);
 
             if (null != parser) {
                 return parser;
             }
-
+            /** 从protobuf数据解析处理管理器中获取对应id的class,并转换为parser */
             Class<?> clazz = protoHandlerMgr.getProtoClass(protoEnumInt);
-
             Field field = clazz.getField("PARSER");
 
             Parser<?> reflectParser = (Parser<?>) field.get(clazz);
-
+            /** 缓存起来 */
             parserMap.put(protoEnumInt, reflectParser);
 
             return reflectParser;

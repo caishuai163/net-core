@@ -14,10 +14,12 @@ import io.netty.channel.Channel;
  * </p>
  */
 public class ProtoHandlerMgr {
-
+    /** 缓存标识和handler映射关系 */
     private Map<Integer, ProtoHandler> protoHandlers = new HashMap<>();
 
+    /** 缓存标识和数据解析器对应的类的映射关系 */
     private Map<Integer, Class<? extends GeneratedMessage>> protoNoMappers = new HashMap<>();
+    /** 缓存标识和数据解析器对应的类的映射关系 反响查询用 */
     private Map<Class<? extends GeneratedMessage>, Integer> protoMsgMappers = new HashMap<>();
 
     public void registerHandler(int protoNo,
@@ -50,10 +52,22 @@ public class ProtoHandlerMgr {
         protoMsgMappers.put(protoClass, hashCode);
     }
 
+    /**
+     * 获取protoEnumInt对应的protobuf数据类型
+     *
+     * @param protoEnum
+     * @return Class<? extends GeneratedMessage>
+     */
     public Class<? extends GeneratedMessage> getProtoClass(int protoEnum) {
         return protoNoMappers.get(protoEnum);
     }
 
+    /**
+     * 获取protobuf数据类型的类对应的标识位
+     *
+     * @param protoClass
+     * @return int protoEnumInt
+     */
     public int getProtoInt(Class<? extends GeneratedMessage> protoClass) {
         return protoMsgMappers.get(protoClass);
     }

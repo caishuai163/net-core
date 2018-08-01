@@ -196,24 +196,41 @@ public class ClientSessionMgr {
         }
     }
 
+    /**
+     * 当接受到服务器端返回的protobuf数据时执行的操作
+     * 
+     * @param requestId
+     *            请求的requestId
+     * @param channel
+     *            使用的channel
+     * @param result
+     *            返回的结果信息
+     */
     public void onServerProtoCome(long requestId, Channel channel,
             ResultInfo result) {
+        /** 获取当前channel对应的session */
         ClientSessionInfo sessionInfo = getSession(channel);
-
+        /** 如果这个channel没有找到对应的session，证明这个请求不是一个消费者等待返回值的请求 */
         if (sessionInfo == null) {
             return;
         }
-
+        /** 获取session中的缓存信息 */
         SyncContext context = sessionInfo.getSyncContext();
-
+        /** 如果这个session中没有缓存信息，也没有必要去处理 */
         if (context == null) {
             return;
         }
-
+        /**
+         * 获取session中的缓存信息对应的当时请求的requestId并判断是否是当前请求的requestId，不是证明这个请求已经不是我发起的那个请求了，很可能已经很被我处理过了，但是你服务器端又给我发了一次
+         */
         if (context.getSyncId() != requestId) {
             return;
         }
-
+        /**
+         * 将返回的数据放到session对应的context的result中，</br>
+         * 这个操作会释放掉客户端消费者消费过程中的等待结果的锁,</br>
+         * 令消费者消费过程继续执行
+         */
         context.setResult(result);
     }
 

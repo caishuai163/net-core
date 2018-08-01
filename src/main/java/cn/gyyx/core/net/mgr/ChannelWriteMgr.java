@@ -4,7 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 
 /**
- * Channel数据写入管理
+ * <p>Channel数据写入管理</p>
  */
 public class ChannelWriteMgr {
 

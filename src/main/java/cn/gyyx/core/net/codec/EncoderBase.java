@@ -25,6 +25,15 @@ public abstract class EncoderBase extends ChannelOutboundHandlerAdapter {
         }
     }
 
+    /**
+     * 调用继承类中{@link ChannelOutboundHandlerAdapter#write(ChannelHandlerContext, Object, ChannelPromise)}方法
+     *
+     * @param ctx
+     * @param byteBuf
+     * @param promise
+     * @throws Exception
+     *             void
+     */
     protected void write(ChannelHandlerContext ctx, ByteBuf byteBuf,
             ChannelPromise promise) throws Exception {
         super.write(ctx, byteBuf, promise);

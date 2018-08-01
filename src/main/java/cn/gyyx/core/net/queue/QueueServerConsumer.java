@@ -21,6 +21,13 @@ public class QueueServerConsumer implements EventHandler<EventInfo> {
         this.moduleService = moduleService;
     }
 
+    /**
+     * <h3>服务端消费者初始化</h3></br>
+     * 缓存事件handler处理类型和处理方法的映射</br>
+     * 服务端业务处理service.init方法
+     *
+     * @throws Exception
+     */
     protected void init() throws Exception {
 
         eventHandlers.put(EventType.CLIENT_REGISTER,
@@ -43,6 +50,13 @@ public class QueueServerConsumer implements EventHandler<EventInfo> {
         handler.onEvent(event);
     }
 
+    /**
+     * 消费者启动事件
+     *
+     * @param ip
+     * @param port
+     * @throws Exception
+     */
     public void start(String ip, int port) throws Exception {
         moduleService.startServer(ip, port);
     }

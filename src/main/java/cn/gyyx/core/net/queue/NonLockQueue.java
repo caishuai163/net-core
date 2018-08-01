@@ -53,10 +53,12 @@ public class NonLockQueue {
      * 无锁队列启动
      *
      * @param eventhandler
+     *            服务端消费者
      * @param ip
+     *            消费者的ip
      * @param port
+     *            消费者的端口号
      * @throws Exception
-     *             void
      */
     public static void start(QueueServerConsumer eventhandler, String ip,
             int port) throws Exception {
@@ -66,24 +68,28 @@ public class NonLockQueue {
          * 创建disrupter事件工厂
          */
         DefaultEventFactory eventFactory = new DefaultEventFactory();
-
+        /** 初始化消费者 */
         eventhandler.init();
 
+        /** 初始化disrupter */
         disruptor = new Disruptor<EventInfo>(eventFactory,
                 INIT_LOGIC_EVENT_CAPACITY, executor, ProducerType.MULTI,
                 YIELDING_WAIT);
+        /** 初始化disrupter消费者事件 */
         disruptor.handleEventsWith(eventhandler);
-
+        /** 初始化ringBuffer */
         ringBuffer = disruptor.getRingBuffer();
-
+        /** disrupter 启动 */
         disruptor.start();
 
+        /** 消费者启动 */
         eventhandler.start(ip, port);
     }
 
     /**
-     * disruptor 事件发布
-     *
+     * <h3>disruptor 事件发布</h3>
+     * 发布后，消费者会监听到，调用消费者的OnEvent事件{@link QueueServerConsumer#onEvent(EventInfo, long, boolean)}
+     * 
      * @param eventInfo
      *            disruptor 事件
      */

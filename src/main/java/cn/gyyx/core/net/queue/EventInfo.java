@@ -12,7 +12,7 @@ public class EventInfo {
     private EventType eventType;
 
     private int protoEnum;
-
+    /** 信道，管道。netty通信时创建的 */
     private Channel channel;
 
     private long requestId;
