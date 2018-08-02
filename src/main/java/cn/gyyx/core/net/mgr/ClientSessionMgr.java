@@ -104,12 +104,19 @@ public class ClientSessionMgr {
         return channels.get(address);
     }
 
+    /**
+     * 缓存中移除session和channel
+     * 
+     * @param channel
+     */
     public void removeSession(Channel channel) {
 
         try {
+            /** 缓存中通过channel获取session */
             ClientSessionInfo session = getSession(channel);
 
             if (session != null) {
+                /** 缓存中移除channel */
                 sessions.remove(channel);
 
                 Map<String, Channel> channels = serviceChannels
@@ -149,6 +156,10 @@ public class ClientSessionMgr {
         }
     }
 
+    /**
+     * <h3>客户端发送Ping请求</h3></br>
+     * 找到所有的使用过的缓存中的session，发送ping请求
+     */
     public void sendPing() {
         for (Map.Entry<Channel, ClientSessionInfo> entry : sessions
                 .entrySet()) {
@@ -160,17 +171,21 @@ public class ClientSessionMgr {
         }
     }
 
+    /**
+     * <h3>客户端检查超时的连接</h3>
+     */
     public void checkTimeoutSession() {
         for (Map.Entry<Channel, ClientSessionInfo> entry : sessions
                 .entrySet()) {
-
+            /** 找到所有的使用过的缓存中的session */
             ClientSessionInfo session = entry.getValue();
 
             int curTime = SystemTimeUtil.getTimestamp();
             int lastTime = session.getLastPingSec();
 
+            /** 检查上次ping成功的时间和当前时间的差值超时了 */
             if (curTime - lastTime > heatSecond) {
-
+                /** 获取服务业务名为该session的信道channels信息 */
                 Map<String, Channel> channels = serviceChannels
                         .get(session.getServiceName());
 
@@ -183,6 +198,7 @@ public class ClientSessionMgr {
                     serviceEntry.setPort(session.getRemotePort());
 
                     try {
+                        /** zookeeper注销服务 */
                         serviceRegister.unregisterService(serviceEntry);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -190,7 +206,9 @@ public class ClientSessionMgr {
                 }
 
                 System.out.println("客户端会话关闭");
+                /** 缓存中移除channel和session */
                 removeSession(entry.getKey());
+                /** 关闭session所对应的信道 */
                 CloseUtil.closeQuietly(session.getChannel());
             }
         }

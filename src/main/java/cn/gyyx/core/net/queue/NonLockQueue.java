@@ -10,20 +10,7 @@ import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 
 /**
-  * <p>
-  *   NonLockQueue描述
-  * </p>
-  *  
-  * @author caishuai
-  * @since 0.0.1
-  */
-/**
- * <p>
- * NonLockQueue描述
- * </p>
- * 
- * @author caishuai
- * @since 0.0.1
+ * 服务端无锁队列
  */
 @SuppressWarnings("unchecked")
 public class NonLockQueue {

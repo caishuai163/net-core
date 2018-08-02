@@ -39,6 +39,12 @@ public class ServiceRegister {
         serviceDisoverMgr.get().registerService(instance);
     }
 
+    /**
+     * Unregister/remove a service instance --注销服务
+     * 
+     * @param serviceEntry
+     * @throws Exception
+     */
     public void unregisterService(ServiceEntry serviceEntry) throws Exception {
         ServiceInstance<ServiceEntry> instance = ServiceInstance
                 .<ServiceEntry> builder().id(serviceEntry.address())

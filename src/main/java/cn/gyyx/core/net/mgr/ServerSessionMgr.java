@@ -24,6 +24,11 @@ public class ServerSessionMgr {
         this.channelMgr = channelMgr;
     }
 
+    /**
+     * 添加session与channel的缓存信息
+     * 
+     * @param session
+     */
     public void addSession(SessionInfo session) {
 
         sessions.put(session.getChannel(), session);
@@ -40,6 +45,15 @@ public class ServerSessionMgr {
         }
     }
 
+    /**
+     * <h3>针对同一信道，查询上次请求的信息。</h3> 判断请求id，若一致，证明业务已经在最近一次处理过了这个请求，直接返回最近一次请求的结果
+     * 
+     * @param requestId
+     *            请求数据的唯一标识
+     * @param channel
+     *            建立的信道，通道
+     * @return {@link GeneratedMessage} 最近一次相同请求的内容，若不是相同请求，则返回null
+     */
     public GeneratedMessage getLastResult(long requestId, Channel channel) {
         SessionInfo session = sessions.get(channel);
 
@@ -75,6 +89,18 @@ public class ServerSessionMgr {
         return sessions.remove(channel);
     }
 
+    /**
+     * 服务端发送响应状态
+     * 
+     * @param requestId
+     *            请求ID
+     * @param status
+     *            状态值
+     * @param channel
+     *            通道
+     * @param proto
+     *            响应数据
+     */
     public void sendMsg(long requestId, byte status, Channel channel,
             GeneratedMessage proto) {
 
@@ -90,7 +116,7 @@ public class ServerSessionMgr {
      * <h3>关闭超时session</h3>
      * <ul>
      * <li>循环缓存sessions中的每一个session</li>
-     * <li>获取session的上次ping的时间与当前时间做差值</li>
+     * <li>获取session的最后一次接收到客户端ping请求的时间与当前时间做差值</li>
      * <li>若得到的差值大于预设值{@link #heatSecond},缓存中移除session,并关闭session channel</li>
      * </ul>
      * 
@@ -112,13 +138,26 @@ public class ServerSessionMgr {
         }
     }
 
+    /**
+     * 响应客户端的心跳包PIng
+     * 
+     * @param channel
+     *            信道
+     * @param requestId
+     *            请求ID
+     * @return
+     */
     public boolean pingHandler(Channel channel, long requestId) {
+        /** 获取channel中的session信息 */
         SessionInfo session = sessions.get(channel);
 
         if (session != null) {
+            /** 设置session的最后一次接收到ping的时间 */
             session.setLastPingSec(SystemTimeUtil.getTimestamp());
         }
-
+        /**
+         * 反向发送ack数据
+         */
         p_module_common_ack.Builder builder = p_module_common_ack.newBuilder();
 
         sendMsg(requestId, StatusCode.SUCCESS, channel, builder.build());

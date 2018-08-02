@@ -72,11 +72,23 @@ public class ProtoHandlerMgr {
         return protoMsgMappers.get(protoClass);
     }
 
+    /**
+     * <h3>解析并处理客户端传来的数据</h3>
+     * <ul>
+     * <li>缓存信息中获取解析类handler</li>
+     * <li>使用handler进行解析。这里的handler实际上是{@link #registerHandler}时注册进来的handler</li>
+     * </ul>
+     * 
+     * @param requestId
+     * @param protoEnum
+     * @param channel
+     * @param proto
+     * @return
+     */
     public GeneratedMessage handleClientProto(long requestId, int protoEnum,
             Channel channel, GeneratedMessage proto) {
 
         ProtoHandler handler = protoHandlers.get(protoEnum);
-
         return handler.handle(requestId, channel, proto);
     }
 

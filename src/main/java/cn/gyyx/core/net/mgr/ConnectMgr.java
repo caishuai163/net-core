@@ -7,6 +7,7 @@ import java.util.List;
 import cn.gyyx.core.net.codec.ClientEncoder;
 import cn.gyyx.core.net.codec.ServerDecoder;
 import cn.gyyx.core.net.timer.DefaultTimer;
+import cn.gyyx.core.net.timer.TimerCallBack;
 import cn.gyyx.core.net.util.SystemTimeUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -50,9 +51,12 @@ public class ConnectMgr {
         this.eventGroupMgr = eventGroupMgr;
         this.clientSessionMgr = clientSessionMgr;
         this.timerMgr = timerMgr;
+        /** 定时器中增加 客户端发送ping请求的定时任务 */
         this.timerMgr.add(new DefaultTimer(clientSessionMgr::sendPing));
+        /** 定时器中增加 客户端检查超时连接的定时任务 */
         this.timerMgr
                 .add(new DefaultTimer(clientSessionMgr::checkTimeoutSession));
+        /** 定时器中增加 客户端重连的定时任务 */
         this.timerMgr.add(new DefaultTimer(this::reConnect, 5000));
         this.protoHandlerMgr = protoHandlerMgr;
     }

@@ -29,17 +29,27 @@ public class QueueServerConsumer implements EventHandler<EventInfo> {
      * @throws Exception
      */
     protected void init() throws Exception {
-
+        /** 客户端注册时怎么做的handler */
         eventHandlers.put(EventType.CLIENT_REGISTER,
             moduleService::onClientRegister);
+        /** 客户端发送数据时怎么做的handler */
         eventHandlers.put(EventType.CLIENT_PROTO_COMMING,
             moduleService::onClientProtoCome);
+        /** 客户端断开连接时怎么做的handler */
         eventHandlers.put(EventType.CLIENT_DISCONNECT,
             moduleService::onClientDisconnect);
 
         moduleService.init();
     }
 
+    /**
+     * <h3>服务端消费者处理</h3>
+     * <ul>
+     * <li>获取事件类型</li>
+     * <li>获取缓存中相应事件的处理器，即init时初始化的几种事件的处理handler</li>
+     * <li>调用相应事件的处理器的OnEvent</li>
+     * </ul>
+     */
     @Override
     public void onEvent(EventInfo event, long sequence, boolean endOfBatch) {
 

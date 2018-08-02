@@ -100,31 +100,54 @@ public abstract class ModuleServerService {
      */
     protected abstract void registerProtoHandlerImpl();
 
+    /**
+     * <h3>处理客户端发来的请求</h3></br>
+     * <ul>
+     * <li>针对同一信道，查询上次请求的信息(相同请求的数据唯一标识ID)。</li>
+     * <li>如果查到上次的数据，直接返回数据，不再执行相同的数据请求</li>
+     * <li>获取到服务端程序解析内容处理后返回的信息</li>
+     * <li>保留该channel的请求的最后一次结果信息并缓存</li>
+     * <li>发送结果信息给客户端</li>
+     * </ul>
+     * 
+     * @param data
+     *            服务端生产者生产的数据，即客户端请求的数据
+     */
     public void onClientProtoCome(EventInfo data) {
-
+        /** 针对同一信道，查询上次请求的信息。 */
         GeneratedMessage result = serverSessionMgr
                 .getLastResult(data.getRequestId(), data.getChannel());
-
+        /** 如果查到上次的数据，直接返回数据，不再执行相同的数据请求 */
         if (result != null) {
+            /** 服务端发送响应状态 */
             serverSessionMgr.sendMsg(data.getRequestId(), StatusCode.SUCCESS,
                 data.getChannel(), result);
             return;
         }
 
         try {
+            /** 获取到服务端程序解析内容处理后返回的信息 */
             result = protohandlerMgr.handleClientProto(data.getRequestId(),
                 data.getProtoEnum(), data.getChannel(), data.getBody());
+            /** 保留该channel的请求的最后一次结果信息并缓存 */
             serverSessionMgr.saveLastResult(data.getRequestId(),
                 data.getChannel(), result);
+            /** 发送结果信息给客户端 */
             serverSessionMgr.sendMsg(data.getRequestId(), StatusCode.SUCCESS,
                 data.getChannel(), result);
         } catch (Throwable ex) {
             ex.printStackTrace();
+            /** 发送异常信息给客户端 */
             serverSessionMgr.sendMsg(data.getRequestId(), StatusCode.EXCEPTION,
                 data.getChannel(), result);
         }
     }
 
+    /**
+     * 事件是客户端注册的时候，创建一个session信息，将它与channel进行绑定
+     * 
+     * @param data
+     */
     public void onClientRegister(EventInfo data) {
 
         SessionInfo session = new SessionInfo();

@@ -75,10 +75,11 @@ public class ClientDecoder extends DecoderBase {
             eventInfo.setRequestId(requestId);
             eventInfo.setChannel(ctx.channel());
             eventInfo.setProtoEnum(protoEnumInt);
-
+            /** disruptor 事件发布(服务端) */
             NonLockQueue.publish(eventInfo);
         } catch (Throwable ex) {
             ex.printStackTrace();
+            /** 发送异常返回值 */
             sessionMgr.sendMsg(requestId, StatusCode.EXCEPTION, ctx.channel(),
                 null);
         }
