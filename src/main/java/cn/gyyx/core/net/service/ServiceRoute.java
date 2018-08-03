@@ -6,11 +6,13 @@ import java.util.Map;
 import org.apache.curator.x.discovery.ProviderStrategy;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.details.InstanceProvider;
+import org.apache.curator.x.discovery.details.ServiceProviderImpl;
 import org.apache.curator.x.discovery.strategies.RandomStrategy;
 import org.apache.curator.x.discovery.strategies.RoundRobinStrategy;
 
 /**
- * 路由服务，管理zookeeper服务的路由策略类型
+ * <h3>路由服务，管理zookeeper服务的路由策略类型</h3></br>
+ * 由于继承了{@link ProviderStrategy},所以在<code>provider.getInstance()</code>时,调用的{@link ServiceProviderImpl#getInstance()}方法内的{@link ProviderStrategy}接口所对应的实现类实际上是本类，在{@link ProviderStrategy#getInstance(InstanceProvider)}时，调用的是本类里的{@link #getInstance(InstanceProvider)},返回Instance时指定了策略模式
  */
 public class ServiceRoute implements ProviderStrategy<ServiceEntry> {
 
@@ -64,7 +66,8 @@ public class ServiceRoute implements ProviderStrategy<ServiceEntry> {
     }
 
     /**
-     * 获取当前使用中的路由策略
+     * <h3>获取当前使用中的路由策略</h3>
+     * 
      */
     @Override
     public ServiceInstance<ServiceEntry> getInstance(

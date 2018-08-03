@@ -17,7 +17,7 @@ import io.netty.channel.socket.DefaultSocketChannelConfig;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 /**
- * 解码Base
+ * 解码Base</br>
  */
 public abstract class DecoderBase extends LengthFieldBasedFrameDecoder {
 
@@ -32,27 +32,31 @@ public abstract class DecoderBase extends LengthFieldBasedFrameDecoder {
 
     protected ProtoHandlerMgr protoHandlerMgr;
 
+    /**
+     * <li>1. maxFrameLength - 发送的数据帧最大长度</li>
+     * <li>2. lengthFieldOffset -
+     * 定义长度域位于发送的字节数组中的下标。换句话说：发送的字节数组中下标为${lengthFieldOffset}的地方是长度域的开始地方</li>
+     * <li>3. lengthFieldLength - 用于描述定义的长度域的长度。换句话说：发送字节数组bytes时,
+     * 字节数组bytes[lengthFieldOffset,
+     * lengthFieldOffset+lengthFieldLength]域对应于的定义长度域部分</li>
+     * <li>4. lengthAdjustment - 满足公式: 发送的字节数组bytes.length - lengthFieldLength =
+     * bytes[lengthFieldOffset, lengthFieldOffset+lengthFieldLength] +
+     * lengthFieldOffset + lengthAdjustment</li>
+     * <li>5. initialBytesToStrip - 接收到的发送数据包，去除前initialBytesToStrip位</li>
+     * <li>6. failFast - true: 读取到长度域超过maxFrameLength，就抛出一个
+     * TooLongFrameException。false: 只有真正读取完长度域的值表示的字节之后，才会抛出
+     * TooLongFrameException，默认情况下设置为true，建议不要修改，否则可能会造成内存溢出</li>
+     * <li>7. ByteOrder - 数据存储采用大端模式或小端模式</li>
+     * 
+     * @param maxFrameLength
+     * @param protoHandlerMgr
+     */
     public DecoderBase(int maxFrameLength, ProtoHandlerMgr protoHandlerMgr) {
         super(maxFrameLength, 0, 4, 0, 4);
         this.protoHandlerMgr = protoHandlerMgr;
     }
 
-    /** 以下几个方法，我认为可以删掉了，实现父类的方法却又调用父类的实现 */
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        super.channelInactive(ctx);
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-    }
-
-    @Override
-    public void channelUnregistered(ChannelHandlerContext ctx)
-            throws Exception {
-        super.channelUnregistered(ctx);
-    }
+    /** 以下几个方法，删掉了，实现父类的方法却又调用父类的实现 */
 
     /**
      * 重载channel的注册方法，修改channel的config配置

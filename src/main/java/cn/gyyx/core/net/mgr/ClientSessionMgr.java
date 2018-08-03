@@ -16,7 +16,8 @@ public class ClientSessionMgr {
     /**
      * 缓存channels信息</br>
      * 每个serviceName对应的channels </br>
-     * 每个channels中每个ip+端口对应的channel
+     * 每个channels中每个ip+端口对应的channel</br>
+     * 一个业务会有一个或多个对应处理业务的服务端(ip+port)
      */
     private Map<String, Map<String, Channel>> serviceChannels = new ConcurrentHashMap<>();
 
@@ -71,6 +72,16 @@ public class ClientSessionMgr {
         return sessions.get(channel);
     }
 
+    /**
+     * <h3>获取信道的请求ID</h3>
+     * <li>获取信道对应的session</li>
+     * <li>session中获取同步上下文信息</li>
+     * <li>同步上下文中获取上下文的请求ID</li>
+     * 
+     * @param channel
+     *            {@link Channel}当前连接使用的信道(通道)
+     * @return long 上下文请求ID
+     */
     public long getRequestId(Channel channel) {
 
         ClientSessionInfo session = sessions.get(channel);
@@ -82,10 +93,8 @@ public class ClientSessionMgr {
 
     /**
      * 缓存中获取channel
-     * <ul>
      * <li>缓存channels的map中获取对应业务名的channels</li>
      * <li>channels中获取对应address的channel</li>
-     * </ul>
      * 
      * @param serviceName
      *            业务名
@@ -119,11 +128,12 @@ public class ClientSessionMgr {
                 /** 缓存中移除channel */
                 sessions.remove(channel);
 
+                /** 获取channels里面的channel map */
                 Map<String, Channel> channels = serviceChannels
                         .get(session.getServiceName());
 
                 if (channels != null) {
-
+                    /** */
                     String address = session.getRemoteIp() + ":"
                             + session.getRemotePort();
 
@@ -186,10 +196,10 @@ public class ClientSessionMgr {
             /** 检查上次ping成功的时间和当前时间的差值超时了 */
             if (curTime - lastTime > heatSecond) {
                 /** 获取服务业务名为该session的信道channels信息 */
-                Map<String, Channel> channels = serviceChannels
+                /** Map<String, Channel> channels = serviceChannels
                         .get(session.getServiceName());
 
-                if (channels != null) {
+               if (channels != null) {
 
                     ServiceEntry serviceEntry = new ServiceEntry();
 
@@ -198,12 +208,12 @@ public class ClientSessionMgr {
                     serviceEntry.setPort(session.getRemotePort());
 
                     try {
-                        /** zookeeper注销服务 */
+                        // zookeeper注销服务 
                         serviceRegister.unregisterService(serviceEntry);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }
+                }*/
 
                 System.out.println("客户端会话关闭");
                 /** 缓存中移除channel和session */

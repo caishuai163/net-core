@@ -21,7 +21,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * 创建tcp的绑定后，当客户端有请求发过来的时候，会先走客户端数据解码操作
  */
 public class ClientDecoder extends DecoderBase {
-
+    /** 数据包的最大长度 */
     private static final int MAX_SERVER_PACKAGE_LENGTH = 1024 * 128;
 
     private ServerSessionMgr sessionMgr;

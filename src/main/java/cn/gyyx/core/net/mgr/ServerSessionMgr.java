@@ -139,7 +139,10 @@ public class ServerSessionMgr {
     }
 
     /**
-     * 响应客户端的心跳包PIng
+     * 响应客户端的心跳包Ping
+     * <li>获取信道对应的session</li>
+     * <li>设置session的最后一次接收到ping的时间</li>
+     * <li>反向发送ack数据</li>
      * 
      * @param channel
      *            信道

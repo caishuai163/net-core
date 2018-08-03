@@ -43,8 +43,9 @@ public class ServiceDiscover {
     }
 
     /**
-     * 获取指定名称的服务实例
-     *
+     * 获取指定名称的服务实例 </br>
+     * 对于获取实例时指定策略模式的实现方式见 {@link ServiceRoute}
+     * 
      * @param serviceName
      *            实例名
      * @param strategryType
@@ -100,10 +101,17 @@ public class ServiceDiscover {
     }
 
     /**
-     * 获取指定名称的服务提供者provider
-     *
+     * 获取指定名称的服务提供者provider</br>
+     * Note: When using Curator 2.x (Zookeeper 3.4.x) it's essential that
+     * service provider objects are cached by your application and reused. Since
+     * the internal NamespaceWatcher objects added by the service provider
+     * cannot be removed in Zookeeper 3.4.x, creating a fresh service provider
+     * for each call to the same service will eventually exhaust the memory of
+     * the JVM.</br>
+     * 大致意思就是说，你要对获取到的provider进行缓存，否则如果你要是每次都去获取一个新的provider，会造成你的jvm内存被消耗光的
+     * 
      * @param serviceName
-     *            服务名称
+     *            业务名称
      * @return {@link ServiceProvider}
      * @throws Exception
      * 
