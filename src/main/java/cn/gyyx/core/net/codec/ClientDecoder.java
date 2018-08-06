@@ -87,6 +87,9 @@ public class ClientDecoder extends DecoderBase {
         return Unpooled.EMPTY_BUFFER;
     }
 
+    /**
+     * netty级别心跳检测，当netty自身检测到channel不再活跃时，向客户端发送服务器关闭事件
+     */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
@@ -100,6 +103,12 @@ public class ClientDecoder extends DecoderBase {
         NonLockQueue.publish(eventInfo);
     }
 
+    /**
+     * work线程(AioSocketChannel所属的AioEventLoop)独立运行后,取出其taskQueue中的第一个任务:
+     * 通过AioSocketChannel的ChannelPipeline触发pipeline的ChannelHandlerContext处理器链的channelRegistered注册事件
+     * </br>
+     * 实现父类并通知客户端连接建立
+     */
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) {
         super.channelRegistered(ctx);

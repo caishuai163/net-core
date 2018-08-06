@@ -92,6 +92,9 @@ public class ServerDecoder extends DecoderBase {
         return Unpooled.EMPTY_BUFFER;
     }
 
+    /**
+     * 未激活状态 断开channel
+     */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 

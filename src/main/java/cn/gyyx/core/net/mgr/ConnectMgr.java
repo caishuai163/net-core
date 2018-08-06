@@ -136,6 +136,12 @@ public class ConnectMgr {
 
     }
 
+    /**
+     * 断开管道channel</br>
+     * 将channel添加到重连map中
+     * 
+     * @param channel
+     */
     public void onDisconnect(Channel channel) {
 
         if (clientSessionMgr.getSession(channel) != null) {
@@ -146,18 +152,22 @@ public class ConnectMgr {
         }
     }
 
+    /**
+     * 不活跃的
+     */
     private void reConnect() {
 
         for (Iterator<ReconnectInfo> itr = reconnects.iterator(); itr
                 .hasNext();) {
 
             ReconnectInfo info = itr.next();
+            /** 如果这个连接信息已经距离当前时间太久远了，超出了设定值,删了它 */
             long endTime = SystemTimeUtil.getTimestamp();
             if (endTime - info.getStartTime() > tryReconnectTimeout) {
                 itr.remove();
                 return;
             }
-
+            /** 如果这个连接信息对应的channel的会话信息已经被清理掉了,删了它 */
             ClientSessionInfo session = clientSessionMgr
                     .getSession(info.getChannel());
 
@@ -165,10 +175,10 @@ public class ConnectMgr {
                 itr.remove();
                 return;
             }
-
+            /** 如果还在的话，试着连一下 */
             Channel newchannel = doConnect(session.getRemoteIp(),
                 session.getRemotePort());
-
+/***/
             if (newchannel != null) {
                 itr.remove();
                 clientSessionMgr.removeSession(info.getChannel());

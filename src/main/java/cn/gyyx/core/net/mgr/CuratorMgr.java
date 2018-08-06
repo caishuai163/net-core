@@ -15,7 +15,8 @@ public class CuratorMgr {
 
     private static final int retryCount = 3;
     /** 默认的 zookeeper 连接串 */
-    private static final String DefaultConnectionString = "10.14.28.43:2181";
+//    private static final String DefaultConnectionString = "10.14.28.43:2181";
+    private static final String DefaultConnectionString = "127.0.0.1:2181";
 
     /**
      * 使用默认的zookeeper连接串{@link #DefaultConnectionString}进行连接

@@ -2,8 +2,6 @@ package cn.gyyx.core.net.codec;
 
 import java.nio.ByteBuffer;
 
-import org.apache.http.client.ClientProtocolException;
-
 import com.google.protobuf.GeneratedMessage;
 
 import cn.gyyx.core.net.mgr.ProtoHandlerMgr;

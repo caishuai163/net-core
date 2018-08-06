@@ -39,10 +39,8 @@ public abstract class DecoderBase extends LengthFieldBasedFrameDecoder {
      * <li>3. lengthFieldLength - 用于描述定义的长度域的长度。换句话说：发送字节数组bytes时,
      * 字节数组bytes[lengthFieldOffset,
      * lengthFieldOffset+lengthFieldLength]域对应于的定义长度域部分</li>
-     * <li>4. lengthAdjustment - 满足公式: 发送的字节数组bytes.length - lengthFieldLength =
-     * bytes[lengthFieldOffset, lengthFieldOffset+lengthFieldLength] +
-     * lengthFieldOffset + lengthAdjustment</li>
-     * <li>5. initialBytesToStrip - 接收到的发送数据包，去除前initialBytesToStrip位</li>
+     * <li>4. lengthAdjustment - 协议体长度调节值，修正信息长度，如果设置为4，那么解码时再向后推4个字节</li>
+     * <li>5. initialBytesToStrip - 跳过字节数，如我们想跳过长度属性部分</li>
      * <li>6. failFast - true: 读取到长度域超过maxFrameLength，就抛出一个
      * TooLongFrameException。false: 只有真正读取完长度域的值表示的字节之后，才会抛出
      * TooLongFrameException，默认情况下设置为true，建议不要修改，否则可能会造成内存溢出</li>
@@ -52,6 +50,10 @@ public abstract class DecoderBase extends LengthFieldBasedFrameDecoder {
      * @param protoHandlerMgr
      */
     public DecoderBase(int maxFrameLength, ProtoHandlerMgr protoHandlerMgr) {
+        /**
+         * 这里的第一个0和4是从0开始读，读4位得到数据的长度</br>
+         * 第二个0是数据偏移量，自己写的数据没有偏移量 第二个4代表开始读数据是从第几位开始读，即去除代表长度的四位开始读数据
+         */
         super(maxFrameLength, 0, 4, 0, 4);
         this.protoHandlerMgr = protoHandlerMgr;
     }
@@ -60,6 +62,9 @@ public abstract class DecoderBase extends LengthFieldBasedFrameDecoder {
 
     /**
      * 重载channel的注册方法，修改channel的config配置
+     * <li>设置连接时间、潜伏期、带宽</li>
+     * <li>用于信道的BytBuffLoalPosit分配缓冲区</li>
+     * <li>channel注册</li>
      */
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) {

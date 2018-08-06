@@ -12,6 +12,9 @@ import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 
+/**
+ * 客户端编码
+ */
 public class ClientEncoder extends EncoderBase {
 
     private ClientSessionMgr sessionMgr;
@@ -48,7 +51,7 @@ public class ClientEncoder extends EncoderBase {
      */
     protected void writeImpl(ChannelHandlerContext ctx, ChannelPromise promise,
             GeneratedMessage generatedMsg) throws Exception {
-        /** 获取数据标识位 */
+        /** 获取数据标识位(实际上是class的hash) */
         int protoEnumInt = protoHandlerMgr.getProtoInt(generatedMsg.getClass());
         /** 获取数据的长度 */
         int protoLength = generatedMsg.getSerializedSize();
@@ -57,15 +60,18 @@ public class ClientEncoder extends EncoderBase {
          * 这里是计算长度和申请bytebuf的内存空间, 原来是</br>
          * <code>int finalProtoLen = 0;</br>
          * ByteBuf byteBuf = null;</code></br>
-         * 这里改成直接赋值了
+         * 这里改成直接赋值了 finalProtoLen=数据长度+(8+4+8),不包括finalProtoLen自己所占用的长度
          */
         int finalProtoLen = protoLength + 20;
         ByteBuf byteBuf = ctx.alloc().directBuffer(finalProtoLen + 4,
             finalProtoLen + 4);
+        /** 4位--数据长度 */
         byteBuf.writeInt(finalProtoLen);
         /** 获取本次请求的requestId */
         long requestId = sessionMgr.getRequestId(ctx.channel());
+        /** 8位--请求标识 */
         byteBuf.writeLong(requestId);
+        /** 4位--数据类型 */
         byteBuf.writeInt(protoEnumInt);
         /** 以下几行是计算签名用的 */
         ByteBuffer byteBuffer = ByteBuffer.allocate(finalProtoLen - 8);
@@ -73,10 +79,11 @@ public class ClientEncoder extends EncoderBase {
         byteBuffer.putInt(protoEnumInt);
         byteBuffer.put(generatedMsg.toByteArray());
         long sign = CRCUtil.Generic(byteBuffer.array());
+        /** 8位--校验位 */
         byteBuf.writeLong(sign);
 
         try (ByteBufOutputStream out = new ByteBufOutputStream(byteBuf)) {
-            // TODO
+            /** 将data-protobuf数据写到请求中 */
             generatedMsg.writeTo(out);
             /** 这块实际上是调用的baseEncode中的protect的write方法 */
             super.write(ctx, out.buffer(), promise);
